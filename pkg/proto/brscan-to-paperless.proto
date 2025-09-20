@@ -1,0 +1,9 @@
+option go_package = "github.com/nint8835/brscan-to-paperless/pkg/proto";
+
+package brscan_to_paperless;
+
+import "google/protobuf/empty.proto";
+
+service BrscanToPaperless {
+    rpc TestRequest (google.protobuf.Empty) returns (google.protobuf.Empty) {}
+};

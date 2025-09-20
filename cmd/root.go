@@ -7,6 +7,7 @@ import (
 )
 
 var logLevel string
+var socketPath string
 
 var rootCmd = &cobra.Command{
 	Use:   "brscan-to-paperless",
@@ -33,5 +34,12 @@ func init() {
 			}
 			return matches, cobra.ShellCompDirectiveNoFileComp
 		},
+	)
+
+	rootCmd.PersistentFlags().StringVar(
+		&socketPath,
+		"socket-path",
+		"/run/brscan-to-paperless/daemon.sock",
+		"Path to the UNIX socket to use for communication between clients and the daemon",
 	)
 }
