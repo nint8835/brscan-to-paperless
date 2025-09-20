@@ -26,7 +26,10 @@ var testingCmd = &cobra.Command{
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 		checkErr(err, "Failed to create gRPC client")
-		defer conn.Close()
+		defer func() {
+			err := conn.Close()
+			checkErr(err, "Failed to close gRPC connection")
+		}()
 
 		daemonClient := pb.NewBrscanToPaperlessClient(conn)
 		_, err = daemonClient.TestRequest(cmd.Context(), &emptypb.Empty{})
