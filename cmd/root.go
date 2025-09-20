@@ -22,13 +22,16 @@ func init() {
 	cobra.OnInitialize(initLogging)
 
 	rootCmd.PersistentFlags().StringVar(&logLevel, "log-level", "info", "Set the logging level (debug, info, warn, error)")
-	rootCmd.RegisterFlagCompletionFunc("log-level", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		var matches []string
-		for _, level := range []string{"debug", "info", "warn", "error"} {
-			if strings.HasPrefix(level, strings.ToLower(toComplete)) {
-				matches = append(matches, level)
+	_ = rootCmd.RegisterFlagCompletionFunc(
+		"log-level",
+		func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			var matches []string
+			for _, level := range []string{"debug", "info", "warn", "error"} {
+				if strings.HasPrefix(level, strings.ToLower(toComplete)) {
+					matches = append(matches, level)
+				}
 			}
-		}
-		return matches, cobra.ShellCompDirectiveNoFileComp
-	})
+			return matches, cobra.ShellCompDirectiveNoFileComp
+		},
+	)
 }
