@@ -32,7 +32,7 @@ var triggerCmd = &cobra.Command{
 
 		client, conn, err := createClient()
 		checkErr(err, "Failed to create gRPC client")
-		defer utils.DeferCloser(conn)
+		defer utils.DeferredClose(conn)
 
 		_, err = client.Trigger(context.Background(), &pb.TriggerRequest{
 			Option: triggerOpt,
