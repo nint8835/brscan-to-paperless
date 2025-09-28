@@ -50,8 +50,8 @@ func (s *Server) Serve() error {
 	return server.Serve(listener)
 }
 
-func (s *Server) TestRequest(_ context.Context, _ *emptypb.Empty) (*emptypb.Empty, error) {
-	s.logger.Info("Received TestRequest")
+func (s *Server) Trigger(ctx context.Context, req *pb.TriggerRequest) (*emptypb.Empty, error) {
+	s.logger.Info("Trigger called", "option", req.Option.String())
 	return &emptypb.Empty{}, nil
 }
 

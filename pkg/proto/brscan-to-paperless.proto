@@ -1,9 +1,24 @@
+syntax = "proto3";
+
 option go_package = "github.com/nint8835/brscan-to-paperless/pkg/proto";
 
 package brscan_to_paperless;
 
 import "google/protobuf/empty.proto";
 
+enum TriggerOption {
+    TRIGGER_OPTION_UNSPECIFIED = 0;
+    TRIGGER_OPTION_FILE = 1;
+    TRIGGER_OPTION_OCR = 2;
+    TRIGGER_OPTION_IMAGE = 3;
+    TRIGGER_OPTION_EMAIL = 4;
+};
+
+message TriggerRequest {
+    TriggerOption option = 1;
+};
+
 service BrscanToPaperless {
-    rpc TestRequest (google.protobuf.Empty) returns (google.protobuf.Empty) {}
+    // Trigger causes the brscan-to-paperless daemon to respond to an incoming event.
+    rpc Trigger (TriggerRequest) returns (google.protobuf.Empty);
 };

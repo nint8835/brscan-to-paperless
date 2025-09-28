@@ -1,12 +1,18 @@
 package cmd
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/lmittmann/tint"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
+	pb "github.com/nint8835/brscan-to-paperless/pkg/proto"
 )
 
 func checkErr(err error, msg string) {
@@ -37,4 +43,23 @@ func initLogging() {
 			},
 		),
 	))
+}
+
+func createClient() (pb.BrscanToPaperlessClient, *grpc.ClientConn, error) {
+	socketAbsPath, err := filepath.Abs(socketPath)
+	checkErr(err, "Failed to get absolute path of socket")
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get absolute path of socket: %w", err)
+	}
+	connStr := fmt.Sprintf("unix://%s", socketAbsPath)
+
+	conn, err := grpc.NewClient(
+		connStr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to create gRPC connection: %w", err)
+	}
+
+	return pb.NewBrscanToPaperlessClient(conn), conn, nil
 }

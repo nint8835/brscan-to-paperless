@@ -20,14 +20,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	BrscanToPaperless_TestRequest_FullMethodName = "/brscan_to_paperless.BrscanToPaperless/TestRequest"
+	BrscanToPaperless_Trigger_FullMethodName = "/brscan_to_paperless.BrscanToPaperless/Trigger"
 )
 
 // BrscanToPaperlessClient is the client API for BrscanToPaperless service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BrscanToPaperlessClient interface {
-	TestRequest(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Trigger causes the brscan-to-paperless daemon to respond to an incoming event.
+	Trigger(ctx context.Context, in *TriggerRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type brscanToPaperlessClient struct {
@@ -38,10 +39,10 @@ func NewBrscanToPaperlessClient(cc grpc.ClientConnInterface) BrscanToPaperlessCl
 	return &brscanToPaperlessClient{cc}
 }
 
-func (c *brscanToPaperlessClient) TestRequest(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *brscanToPaperlessClient) Trigger(ctx context.Context, in *TriggerRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, BrscanToPaperless_TestRequest_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, BrscanToPaperless_Trigger_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +53,8 @@ func (c *brscanToPaperlessClient) TestRequest(ctx context.Context, in *emptypb.E
 // All implementations must embed UnimplementedBrscanToPaperlessServer
 // for forward compatibility.
 type BrscanToPaperlessServer interface {
-	TestRequest(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
+	// Trigger causes the brscan-to-paperless daemon to respond to an incoming event.
+	Trigger(context.Context, *TriggerRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedBrscanToPaperlessServer()
 }
 
@@ -63,8 +65,8 @@ type BrscanToPaperlessServer interface {
 // pointer dereference when methods are called.
 type UnimplementedBrscanToPaperlessServer struct{}
 
-func (UnimplementedBrscanToPaperlessServer) TestRequest(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method TestRequest not implemented")
+func (UnimplementedBrscanToPaperlessServer) Trigger(context.Context, *TriggerRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Trigger not implemented")
 }
 func (UnimplementedBrscanToPaperlessServer) mustEmbedUnimplementedBrscanToPaperlessServer() {}
 func (UnimplementedBrscanToPaperlessServer) testEmbeddedByValue()                           {}
@@ -87,20 +89,20 @@ func RegisterBrscanToPaperlessServer(s grpc.ServiceRegistrar, srv BrscanToPaperl
 	s.RegisterService(&BrscanToPaperless_ServiceDesc, srv)
 }
 
-func _BrscanToPaperless_TestRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+func _BrscanToPaperless_Trigger_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TriggerRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BrscanToPaperlessServer).TestRequest(ctx, in)
+		return srv.(BrscanToPaperlessServer).Trigger(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: BrscanToPaperless_TestRequest_FullMethodName,
+		FullMethod: BrscanToPaperless_Trigger_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BrscanToPaperlessServer).TestRequest(ctx, req.(*emptypb.Empty))
+		return srv.(BrscanToPaperlessServer).Trigger(ctx, req.(*TriggerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -113,8 +115,8 @@ var BrscanToPaperless_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*BrscanToPaperlessServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "TestRequest",
-			Handler:    _BrscanToPaperless_TestRequest_Handler,
+			MethodName: "Trigger",
+			Handler:    _BrscanToPaperless_Trigger_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
