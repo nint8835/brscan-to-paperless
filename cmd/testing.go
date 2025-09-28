@@ -1,16 +1,34 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"image"
 	"image/png"
+	"io"
 	"log/slog"
 	"os"
 
+	"codeberg.org/go-pdf/fpdf"
 	"github.com/fewebahr/sane"
 	"github.com/spf13/cobra"
-
-	"github.com/nint8835/brscan-to-paperless/pkg/utils"
 )
+
+func imageToPNGReader(img image.Image) io.Reader {
+	pr, pw := io.Pipe()
+	go func() {
+		err := png.Encode(pw, img)
+		if err != nil {
+			_ = pw.CloseWithError(fmt.Errorf("failed to encode image to PNG: %w", err))
+			return
+		}
+		err = pw.Close()
+		if err != nil {
+			slog.Error("Failed to close pipe writer", "err", err)
+		}
+	}()
+	return pr
+}
 
 var testingCmd = &cobra.Command{
 	Use:    "testing",
@@ -45,33 +63,57 @@ var testingCmd = &cobra.Command{
 		checkErr(err, "Failed to open SANE device")
 		defer conn.Close()
 
-		// inf, err := conn.SetOption("source", "flatbed")
-		// checkErr(err, "Failed to set source option")
-		// slog.Info("Set source option", "info", inf)
-
 		imageNum := 1
+
+		pdf := fpdf.New("P", "pt", "", "")
 
 		for {
 			slog.Info("Attempting to scan...")
 			image, err := conn.ReadImage()
+			if errors.Is(err, sane.ErrEmpty) {
+				break
+			}
 			checkErr(err, "Failed to read image from SANE device")
 
 			slog.Info("Successfully read image from SANE device", "bounds", image.Bounds())
 
-			fname := fmt.Sprintf("test-%d.png", imageNum)
-
-			out, err := os.Create(fname)
-			checkErr(err, "Failed to create output file")
-			defer utils.DeferredClose(out)
-
-			err = png.Encode(out, image)
-			checkErr(err, "Failed to encode image to PNG")
-
-			slog.Info("Successfully wrote image", "file", fname)
+			pdf.AddPageFormat(
+				"P",
+				fpdf.SizeType{
+					Wd: float64(image.Bounds().Dx()),
+					Ht: float64(image.Bounds().Dy()),
+				},
+			)
+			pdf.RegisterImageOptionsReader(
+				fmt.Sprintf("image-%d", imageNum),
+				fpdf.ImageOptions{
+					ReadDpi:   true,
+					ImageType: "PNG",
+				},
+				imageToPNGReader(image),
+			)
+			pdf.ImageOptions(
+				fmt.Sprintf("image-%d", imageNum),
+				0,
+				0,
+				float64(image.Bounds().Dx()),
+				float64(image.Bounds().Dy()),
+				false,
+				fpdf.ImageOptions{
+					ReadDpi:   true,
+					ImageType: "PNG",
+				},
+				0,
+				"",
+			)
 
 			imageNum++
 		}
 
+		err = pdf.OutputFileAndClose("test-output.pdf")
+		checkErr(err, "Failed to save PDF file")
+
+		slog.Info("Successfully saved PDF file", "path", "test-output.pdf")
 	},
 }
 
