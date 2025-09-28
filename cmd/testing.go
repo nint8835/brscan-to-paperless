@@ -1,12 +1,13 @@
 package cmd
 
 import (
+	"fmt"
 	"image/png"
 	"log/slog"
 	"os"
 
+	"github.com/fewebahr/sane"
 	"github.com/spf13/cobra"
-	"github.com/tjgq/sane"
 
 	"github.com/nint8835/brscan-to-paperless/pkg/utils"
 )
@@ -44,24 +45,33 @@ var testingCmd = &cobra.Command{
 		checkErr(err, "Failed to open SANE device")
 		defer conn.Close()
 
-		inf, err := conn.SetOption("source", "flatbed")
-		checkErr(err, "Failed to set source option")
-		slog.Info("Set source option", "info", inf)
+		// inf, err := conn.SetOption("source", "flatbed")
+		// checkErr(err, "Failed to set source option")
+		// slog.Info("Set source option", "info", inf)
 
-		slog.Info("Attempting to scan...")
-		image, err := conn.ReadImage()
-		checkErr(err, "Failed to read image from SANE device")
+		imageNum := 1
 
-		slog.Info("Successfully read image from SANE device", "bounds", image.Bounds())
+		for {
+			slog.Info("Attempting to scan...")
+			image, err := conn.ReadImage()
+			checkErr(err, "Failed to read image from SANE device")
 
-		out, err := os.Create("test.png")
-		checkErr(err, "Failed to create output file")
-		defer utils.DeferredClose(out)
+			slog.Info("Successfully read image from SANE device", "bounds", image.Bounds())
 
-		err = png.Encode(out, image)
-		checkErr(err, "Failed to encode image to PNG")
+			fname := fmt.Sprintf("test-%d.png", imageNum)
 
-		slog.Info("Successfully wrote image to test.png")
+			out, err := os.Create(fname)
+			checkErr(err, "Failed to create output file")
+			defer utils.DeferredClose(out)
+
+			err = png.Encode(out, image)
+			checkErr(err, "Failed to encode image to PNG")
+
+			slog.Info("Successfully wrote image", "file", fname)
+
+			imageNum++
+		}
+
 	},
 }
 

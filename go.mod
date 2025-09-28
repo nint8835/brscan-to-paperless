@@ -3,9 +3,9 @@ module github.com/nint8835/brscan-to-paperless
 go 1.25.1
 
 require (
+	github.com/fewebahr/sane v0.0.0-20230106144818-0b373ed1b280
 	github.com/lmittmann/tint v1.1.2
 	github.com/spf13/cobra v1.10.1
-	github.com/tjgq/sane v0.0.0-20180903025858-a697b47bd07c
 	google.golang.org/grpc v1.75.1
 	google.golang.org/protobuf v1.36.9
 )
