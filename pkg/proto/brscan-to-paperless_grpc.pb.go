@@ -11,7 +11,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -28,7 +27,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BrscanToPaperlessClient interface {
 	// Trigger causes the brscan-to-paperless daemon to respond to an incoming event.
-	Trigger(ctx context.Context, in *TriggerRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Trigger(ctx context.Context, in *TriggerRequest, opts ...grpc.CallOption) (*TriggerResponse, error)
 }
 
 type brscanToPaperlessClient struct {
@@ -39,9 +38,9 @@ func NewBrscanToPaperlessClient(cc grpc.ClientConnInterface) BrscanToPaperlessCl
 	return &brscanToPaperlessClient{cc}
 }
 
-func (c *brscanToPaperlessClient) Trigger(ctx context.Context, in *TriggerRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *brscanToPaperlessClient) Trigger(ctx context.Context, in *TriggerRequest, opts ...grpc.CallOption) (*TriggerResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
+	out := new(TriggerResponse)
 	err := c.cc.Invoke(ctx, BrscanToPaperless_Trigger_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -54,7 +53,7 @@ func (c *brscanToPaperlessClient) Trigger(ctx context.Context, in *TriggerReques
 // for forward compatibility.
 type BrscanToPaperlessServer interface {
 	// Trigger causes the brscan-to-paperless daemon to respond to an incoming event.
-	Trigger(context.Context, *TriggerRequest) (*emptypb.Empty, error)
+	Trigger(context.Context, *TriggerRequest) (*TriggerResponse, error)
 	mustEmbedUnimplementedBrscanToPaperlessServer()
 }
 
@@ -65,7 +64,7 @@ type BrscanToPaperlessServer interface {
 // pointer dereference when methods are called.
 type UnimplementedBrscanToPaperlessServer struct{}
 
-func (UnimplementedBrscanToPaperlessServer) Trigger(context.Context, *TriggerRequest) (*emptypb.Empty, error) {
+func (UnimplementedBrscanToPaperlessServer) Trigger(context.Context, *TriggerRequest) (*TriggerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Trigger not implemented")
 }
 func (UnimplementedBrscanToPaperlessServer) mustEmbedUnimplementedBrscanToPaperlessServer() {}

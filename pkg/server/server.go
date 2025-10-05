@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net"
@@ -9,9 +10,11 @@ import (
 	"path/filepath"
 
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	pb "github.com/nint8835/brscan-to-paperless/pkg/proto"
+	"github.com/nint8835/brscan-to-paperless/pkg/worker"
 )
 
 type Server struct {
@@ -19,6 +22,7 @@ type Server struct {
 
 	socketPath string
 	logger     *slog.Logger
+	worker     *worker.Worker
 }
 
 func (s *Server) Serve() error {
@@ -50,16 +54,33 @@ func (s *Server) Serve() error {
 	return server.Serve(listener)
 }
 
-func (s *Server) Trigger(ctx context.Context, req *pb.TriggerRequest) (*emptypb.Empty, error) {
+func (s *Server) Trigger(ctx context.Context, req *pb.TriggerRequest) (*pb.TriggerResponse, error) {
 	s.logger.Info("Trigger called", "option", req.Option.String())
-	return &emptypb.Empty{}, nil
+
+	scannedPages, err := s.worker.Scan()
+	if errors.Is(err, worker.ErrTaskOngoing) {
+		return nil, status.Error(codes.FailedPrecondition, err.Error())
+	} else if err != nil {
+		s.logger.Error("Failed to scan", "err", err)
+		return nil, status.Error(codes.Internal, "Failed to scan")
+	}
+
+	return &pb.TriggerResponse{
+		PagesScanned: uint32(scannedPages),
+	}, nil
 }
 
-func New(socketPath string) *Server {
+func New(socketPath string) (*Server, error) {
+	workerInst, err := worker.New()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create worker: %w", err)
+	}
+
 	return &Server{
 		socketPath: socketPath,
 		logger: slog.Default().With(
 			slog.String("component", "server"),
 		),
-	}
+		worker: workerInst,
+	}, nil
 }
