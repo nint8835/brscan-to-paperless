@@ -1,1 +1,2 @@
 pkg/proto/*.pb.go linguist-generated
+pkg/paperless/client.gen.go linguist-generated

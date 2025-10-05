@@ -7,12 +7,15 @@ import (
 	"sync"
 
 	"github.com/fewebahr/sane"
+
+	"github.com/nint8835/brscan-to-paperless/pkg/paperless"
 )
 
 type Worker struct {
-	mutex  sync.Mutex
-	logger *slog.Logger
-	conn   *sane.Conn
+	mutex           sync.Mutex
+	logger          *slog.Logger
+	conn            *sane.Conn
+	paperlessClient *paperless.Client
 }
 
 func New() (*Worker, error) {
