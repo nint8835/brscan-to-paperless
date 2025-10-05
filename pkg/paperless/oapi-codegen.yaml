@@ -5,4 +5,5 @@ generate:
   client: true
   models: true
 output-options:
-  response-type-suffix: Resp
+  include-operation-ids:
+    - documents_post_document_create
